@@ -26,7 +26,6 @@ youtube = googleapiclient.discovery.build(
 request = youtube.commentThreads().list(
     part="snippet", videoId=input("Enter the video's YouTube ID: "), maxResults=100
 )
-
 response = request.execute()
 
 
