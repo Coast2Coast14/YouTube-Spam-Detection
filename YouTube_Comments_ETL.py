@@ -1,5 +1,5 @@
 # Things to add on eventually: airflow, add to github add function to return quota limits, include replies
-# to comments as well in comments returned
+# to comments as well in comments returned, function to get all comments from a playlist
 
 import googleapiclient.discovery
 import googleapiclient.errors
