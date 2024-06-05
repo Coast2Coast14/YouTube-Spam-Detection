@@ -67,17 +67,15 @@ def get_replies(youtube, parent_id, video_id):  # Added video_id as an argument
         for item in reply_response["items"]:
             comment = item["snippet"]
             replies.append(
-                {
-                    "Timestamp": comment["publishedAt"],
-                    "Username": comment["authorDisplayName"],
-                    "VideoID": video_id,
-                    "Comment": comment["textDisplay"],
-                    "Date": (
-                        comment["updatedAt"]
-                        if "updatedAt" in comment
-                        else comment["publishedAt"]
-                    ),
-                }
+                [
+                    comment["channelId"],
+                    comment["textDisplay"],
+                    comment["textOriginal"],
+                    comment["viewerRating"],
+                    comment["likeCount"],
+                    comment["publishedAt"],
+                    comment["updatedAt"],
+                ]
             )
 
         next_page_token = reply_response.get("nextPageToken")
