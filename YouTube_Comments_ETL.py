@@ -29,26 +29,6 @@ request = youtube.commentThreads().list(
 response = request.execute()
 
 
-# function that gets the specified columns from the youtube api
-def process_youtube_comments(response):
-
-    comments = []
-    for item in response["items"]:
-        comment = item["snippet"]["topLevelComment"]["snippet"]
-        comments.append(
-            [
-                comment["channelId"],
-                comment["textDisplay"],
-                comment["textOriginal"],
-                comment["viewerRating"],
-                comment["likeCount"],
-                comment["publishedAt"],
-                comment["updatedAt"],
-            ]
-        )
-    return comments
-
-
 # Function to get replies for a specific comment
 def get_replies(youtube, parent_id, video_id):  # Added video_id as an argument
     replies = []
@@ -173,7 +153,6 @@ def insert_table(db_connection, df):
 
 # Runs the data pipeline
 def run_data_pipeline():
-    comments = process_youtube_comments(response=response)
     comments = get_comments_for_video(
         youtube=youtube, video_id=input("Enter the video's YouTube ID: ")
     )
