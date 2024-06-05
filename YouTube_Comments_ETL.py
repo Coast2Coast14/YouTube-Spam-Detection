@@ -22,12 +22,6 @@ youtube = googleapiclient.discovery.build(
     api_service_name, api_version, developerKey=DEVELOPER_KEY
 )
 
-# function that asks which YouTube video to get comments from
-request = youtube.commentThreads().list(
-    part="snippet", videoId=input("Enter the video's YouTube ID: "), maxResults=100
-)
-response = request.execute()
-
 
 # Function to get replies for a specific comment
 def get_replies(youtube, parent_id, video_id):  # Added video_id as an argument
