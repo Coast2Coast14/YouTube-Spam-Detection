@@ -49,6 +49,86 @@ def process_youtube_comments(response):
     return comments
 
 
+# Function to get replies for a specific comment
+def get_replies(youtube, parent_id, video_id):  # Added video_id as an argument
+    replies = []
+    next_page_token = None
+
+    while True:
+        reply_request = youtube.comments().list(
+            part="snippet",
+            parentId=parent_id,
+            textFormat="plainText",
+            maxResults=100,
+            pageToken=next_page_token,
+        )
+        reply_response = reply_request.execute()
+
+        for item in reply_response["items"]:
+            comment = item["snippet"]
+            replies.append(
+                [
+                    comment["channelId"],
+                    comment["textDisplay"],
+                    comment["textOriginal"],
+                    comment["viewerRating"],
+                    comment["likeCount"],
+                    comment["publishedAt"],
+                    comment["updatedAt"],
+                ]
+            )
+
+        next_page_token = reply_response.get("nextPageToken")
+        if not next_page_token:
+            break
+
+    return replies
+
+
+# Function to get all comments (including replies) for a single video
+def get_comments_for_video(youtube, video_id):
+    comments = []
+    next_page_token = None
+
+    while True:
+        comment_request = youtube.commentThreads().list(
+            part="snippet",
+            videoId=video_id,
+            pageToken=next_page_token,
+            textFormat="plainText",
+            maxResults=100,
+        )
+        comment_response = comment_request.execute()
+
+        for item in comment_response["items"]:
+            comment = item["snippet"]["topLevelComment"]["snippet"]
+            comments.append(
+                [
+                    comment["channelId"],
+                    comment["textDisplay"],
+                    comment["textOriginal"],
+                    comment["viewerRating"],
+                    comment["likeCount"],
+                    comment["publishedAt"],
+                    comment["updatedAt"],
+                ]
+            )
+
+            # Fetch replies if there are any
+            if item["snippet"]["totalReplyCount"] > 0:
+                comments.extend(
+                    get_replies(
+                        youtube, item["snippet"]["topLevelComment"]["id"], video_id
+                    )
+                )
+
+        next_page_token = comment_response.get("nextPageToken")
+        if not next_page_token:
+            break
+
+    return comments
+
+
 # creates a datafame out of the columns
 def create_dataframe(comments):
 
@@ -94,6 +174,9 @@ def insert_table(db_connection, df):
 # Runs the data pipeline
 def run_data_pipeline():
     comments = process_youtube_comments(response=response)
+    comments = get_comments_for_video(
+        youtube=youtube, video_id=input("Enter the video's YouTube ID: ")
+    )
 
     df = create_dataframe(comments=comments)
 
