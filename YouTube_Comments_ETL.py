@@ -1,5 +1,5 @@
-# Things to add on eventually: airflow, add to github add function to return quota limits, include replies
-# to comments as well in comments returned, function to get all comments from a playlist
+# Things to add on eventually: airflow for data orchestration, add function to return quota limits,
+# function to get all comments from a playlist
 
 import googleapiclient.discovery
 import googleapiclient.errors
@@ -21,6 +21,29 @@ DEVELOPER_KEY = os.getenv("DEVELOPER_KEY")
 youtube = googleapiclient.discovery.build(
     api_service_name, api_version, developerKey=DEVELOPER_KEY
 )
+
+
+# Function to get the channel ID from a channel name
+def get_channel_id(channel_name):
+    request = youtube.search().list(
+        part="snippet", q=channel_name, type="channel", maxResults=1
+    )
+    response = request.execute()
+    channel_id = response["items"][0]["snippet"]["channelId"]
+    return channel_id
+
+
+# get the most recent video from a youtube channel
+def get_most_recent_video(channel_id):
+    request = youtube.search().list(
+        part="snippet",
+        channelId=channel_id,
+        order="date",  # Orders the results by date
+        maxResults=1,
+    )
+    response = request.execute()
+    video_id = response["items"][0]["id"]["videoId"]
+    return video_id
 
 
 # Function to get replies for a specific comment
@@ -147,9 +170,12 @@ def insert_table(db_connection, df):
 
 # Runs the data pipeline
 def run_data_pipeline():
-    comments = get_comments_for_video(
-        youtube=youtube, video_id=input("Enter the video's YouTube ID: ")
-    )
+
+    channel_name = input("What YouTube channel do you want to use? ")
+    channel_id = get_channel_id(channel_name)
+    most_recent_video_id = get_most_recent_video(channel_id=channel_id)
+
+    comments = get_comments_for_video(youtube=youtube, video_id=most_recent_video_id)
 
     df = create_dataframe(comments=comments)
 
