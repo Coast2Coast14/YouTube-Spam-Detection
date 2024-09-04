@@ -4,6 +4,7 @@
 import googleapiclient.discovery
 import googleapiclient.errors
 import pandas as pd
+import boto3
 from sqlalchemy import create_engine
 import os
 from dotenv import load_dotenv
@@ -168,6 +169,17 @@ def insert_table(db_connection, df):
         print("Error loading data into database ❌")
 
 
+# Uploads the data to S3
+def upload_file_to_s3(df_csv, bucket_name, object_name=None):
+    s3_client = boto3.client("s3")
+
+    if object_name is None:
+        object_name = df_csv
+
+    key = "s3://youtubedatademo/youtubedata/Test_YouTube_Comments.csv"
+    s3_client.upload_file("Test_YouTube_Comments.csv", bucket_name, object_name)
+
+
 # Runs the data pipeline
 def run_data_pipeline():
 
@@ -182,6 +194,12 @@ def run_data_pipeline():
     db_connection = create_db_connection()
 
     insert_table(db_connection=db_connection, df=df)
+
+    df_csv = df.to_csv("Test_YouTube_Comments.csv")
+    test_path = "/Users/elijahwooten/Desktop/Side_Projects/YouTube Videos/Youtube_Spam_Detection/Test_YouTube_Comments.csv"
+    # bucket_name = "your-s3-bucket-name"
+    bucket_name = "youtubedatademo"
+    upload_file_to_s3(df_csv=test_path, bucket_name=bucket_name)
 
 
 if __name__ == "__main__":
