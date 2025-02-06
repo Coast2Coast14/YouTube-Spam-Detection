@@ -11,6 +11,7 @@ from Spam_Detection_Algorithm import *
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 import streamlit as st
+import stripe
 
 st.title("YouTube Comment Spam Detector")
 url = st.text_input("Enter YouTube Video URL")
