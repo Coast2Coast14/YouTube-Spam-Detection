@@ -2,7 +2,7 @@
 # function to get all comments from a playlist
 
 import boto3
-from delete_this import *
+from Spam_Detection_Algorithm import *
 from dotenv import load_dotenv
 import googleapiclient.discovery
 import googleapiclient.errors
@@ -14,7 +14,7 @@ from sqlalchemy.orm import sessionmaker
 import streamlit as st
 
 st.title("YouTube Video Comment Spam Checker")
-video_id = st.text_input("Enter the Video ID for your Desired YouTube Video")
+url = st.text_input("Enter the URL for your Desired YouTube Video")
 
 # Load environment variables from .env file
 load_dotenv()
@@ -88,6 +88,15 @@ def get_replies(youtube, parent_id, video_id):  # Added video_id as an argument
             break
 
     return replies
+
+
+# Function to extract the video id from a URL
+def extract_video_id(url):
+    """Extracts the video ID from a YouTube URL"""
+    pattern = r"(?:v=|\/)([0-9A-Za-z_-]{11}).*"
+    match = re.search(pattern, url)
+    video_id = match.group(1) if match else None
+    return video_id
 
 
 # Function to get all comments (including replies) for a single video
@@ -219,7 +228,7 @@ def classify_comments(model, vectorizer):
         X_test_tfidf
     )  # Predict spam (1) or not spam (0)
 
-    return df_new_comments[df_new_comments["is_spam"] == 1]
+    return df_new_comments["textDisplay"][df_new_comments["is_spam"] == 1]
 
 
 def update_database_with_spam_status(df_new_comments):
@@ -246,6 +255,8 @@ def fetch_spam_comments():
 # Runs the data pipeline
 def run_data_pipeline():
 
+    video_id = extract_video_id(url=url)
+
     comments = get_comments_for_video(youtube=youtube, video_id=video_id)
 
     df = create_dataframe(comments=comments)
@@ -269,5 +280,6 @@ def run_data_pipeline():
 
 
 # if __name__ == "__main__":
-if video_id:
-    run_data_pipeline()
+if st.button("Check for Spam"):
+    if url:
+        run_data_pipeline()
