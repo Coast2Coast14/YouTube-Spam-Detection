@@ -31,16 +31,6 @@ youtube = googleapiclient.discovery.build(
 )
 
 
-# Function to get the channel ID from a channel name
-def get_channel_id(channel_name):
-    request = youtube.search().list(
-        part="snippet", q=channel_name, type="channel", maxResults=1
-    )
-    response = request.execute()
-    channel_id = response["items"][0]["snippet"]["channelId"]
-    return channel_id
-
-
 # Function to get replies for a specific comment
 def get_replies(youtube, parent_id, video_id):  # Added video_id as an argument
     replies = []
