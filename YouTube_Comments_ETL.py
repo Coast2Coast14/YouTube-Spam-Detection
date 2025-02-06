@@ -1,15 +1,17 @@
 # Things to add on eventually: airflow for data orchestration, add function to return quota limits,
 # function to get all comments from a playlist
 
+import boto3
+from delete_this import *
+from dotenv import load_dotenv
 import googleapiclient.discovery
 import googleapiclient.errors
+import os
 import pandas as pd
-import boto3
+from sklearn.feature_extraction.text import TfidfVectorizer
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
-import os
 import streamlit as st
-from dotenv import load_dotenv
 
 st.title("YouTube Video Comment Spam Checker")
 video_id = st.text_input("Enter the Video ID for your Desired YouTube Video")
@@ -187,29 +189,45 @@ def insert_table(db_connection, df):
 def fetch_new_comments():
     """Fetch all YouTube comments from the database."""
     session = SessionLocal()
-    df_comments = pd.read_sql("SELECT textDisplay FROM youtube_comments", session.bind)
+    df_new_comments = pd.read_sql(
+        "SELECT textDisplay FROM youtube_comments", session.bind
+    )
     session.close()
-    return df_comments
+    return df_new_comments
 
 
-def classify_comments(df):
+def clean_new_comments():
+    df_new_comments = fetch_new_comments()
+
+    # Clean the new comments
+    df_new_comments["textDisplay"] = df_new_comments["textDisplay"].apply(clean_text)
+
+    return df_new_comments
+
+
+def classify_comments(model, vectorizer):
     """Apply the trained spam detection model to classify comments."""
-    if df.empty:
-        return df  # Return empty if no comments exist
+    df_new_comments = clean_new_comments()
 
-    X_test = vectorizer.transform(
-        df["comment_text"]
-    )  # Convert text to numerical format
-    df["is_spam"] = model.predict(X_test)  # Predict spam (1) or not spam (0)
-    return df
+    # Convert new comments into TF-IDF using the same vectorizer
+    X_test_tfidf = vectorizer.transform(df_new_comments["textDisplay"])
+
+    if df_new_comments.empty:
+        return df_new_comments  # Return empty if no comments exist
+
+    df_new_comments["is_spam"] = model.predict(
+        X_test_tfidf
+    )  # Predict spam (1) or not spam (0)
+
+    return df_new_comments[df_new_comments["is_spam"] == 1]
 
 
-def update_database_with_spam_status(df):
+def update_database_with_spam_status(df_new_comments):
     """Update the SQLAlchemy database with spam classification results."""
     session = SessionLocal()
-    for _, row in df.iterrows():
+    for _, row in df_new_comments.iterrows():
         session.execute(
-            f"UPDATE comments SET is_spam = {int(row['is_spam'])} WHERE index = {row['index']}"
+            f"UPDATE youtube_comments SET is_spam = {int(row['is_spam'])} WHERE index = {row['index']}"
         )
     session.commit()
     session.close()
@@ -225,24 +243,8 @@ def fetch_spam_comments():
     return df_spam
 
 
-# Uploads the data to S3
-def upload_file_to_s3(df_csv, bucket_name, object_name=None):
-    s3_client = boto3.client("s3")
-
-    if object_name is None:
-        object_name = df_csv
-
-    key = "s3://youtubedatademo/youtubedata/Test_YouTube_Comments.csv"
-    s3_client.upload_file("Test_YouTube_Comments.csv", bucket_name, object_name)
-
-
 # Runs the data pipeline
 def run_data_pipeline():
-
-    # x = st.text_input("What YouTube video do you want to use? ")
-    # video_id = input("What YouTube channel do you want to use? ")
-    # channel_id = get_channel_id(channel_name)
-    # most_recent_video_id = get_most_recent_video(channel_id=channel_id)
 
     comments = get_comments_for_video(youtube=youtube, video_id=video_id)
 
@@ -250,16 +252,20 @@ def run_data_pipeline():
 
     insert_table(db_connection=db_connection, df=df)
 
-    # comments_table = df["textDisplay"]
+    try:
+        model, vectorizer = train_random_forest_model()
+        print("Model Trained")
 
-    return st.table(fetch_new_comments())
+    except:
+        print("Model Not Trained")
 
+    # df_new_comments = classify_comments(model=model, vectorizer=vectorizer)
 
-#    df_csv = df.to_csv("Test_YouTube_Comments.csv")
-#    test_path = "/Users/elijahwooten/Desktop/Side_Projects/YouTube Videos/Youtube_Spam_Detection/Test_YouTube_Comments.csv"
-#    bucket_name = "your-s3-bucket-name"
-#    bucket_name = "youtubedatademo"
-#    upload_file_to_s3(df_csv=test_path, bucket_name=bucket_name)"""
+    # update_database_with_spam_status(df_new_comments=df_new_comments)
+
+    # df_spam = fetch_spam_comments()
+
+    return st.table(classify_comments(model=model, vectorizer=vectorizer))
 
 
 # if __name__ == "__main__":
