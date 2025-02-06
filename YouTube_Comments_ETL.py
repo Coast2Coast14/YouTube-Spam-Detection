@@ -13,8 +13,8 @@ from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 import streamlit as st
 
-st.title("YouTube Video Comment Spam Checker")
-url = st.text_input("Enter the URL for your Desired YouTube Video")
+st.title("YouTube Comment Spam Detector")
+url = st.text_input("Enter YouTube Video URL")
 
 # Load environment variables from .env file
 load_dotenv()
@@ -39,19 +39,6 @@ def get_channel_id(channel_name):
     response = request.execute()
     channel_id = response["items"][0]["snippet"]["channelId"]
     return channel_id
-
-
-# get the most recent video from a youtube channel
-def get_most_recent_video(channel_id):
-    request = youtube.search().list(
-        part="snippet",
-        channelId=channel_id,
-        order="date",  # Orders the results by date
-        maxResults=1,
-    )
-    response = request.execute()
-    video_id = response["items"][0]["id"]["videoId"]
-    return video_id
 
 
 # Function to get replies for a specific comment
