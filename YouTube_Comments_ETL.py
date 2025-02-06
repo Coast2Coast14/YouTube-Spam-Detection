@@ -1,14 +1,13 @@
 # Things to add on eventually: airflow for data orchestration, add function to return quota limits,
 # function to get all comments from a playlist
 
-import boto3
-from Spam_Detection_Algorithm import *
 from dotenv import load_dotenv
 import googleapiclient.discovery
 import googleapiclient.errors
 import os
 import pandas as pd
 from sklearn.feature_extraction.text import TfidfVectorizer
+from Spam_Detection_Algorithm import *
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 import streamlit as st
