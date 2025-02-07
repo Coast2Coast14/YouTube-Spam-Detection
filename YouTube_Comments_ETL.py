@@ -24,7 +24,7 @@ load_dotenv()
 api_service_name = "youtube"
 api_version = "v3"
 DEVELOPER_KEY = os.getenv("DEVELOPER_KEY")
-SERVICE_ACCOUNT_FILE = "charming-well-424900-n4-39304b00884f.json"
+SERVICE_ACCOUNT_FILE = "charming-well-424900-n4-7cfbc2bd35b9.json"
 SCOPES = ["https://www.googleapis.com/auth/youtube.force-ssl"]
 credentials = service_account.Credentials.from_service_account_file(
     SERVICE_ACCOUNT_FILE, scopes=SCOPES
