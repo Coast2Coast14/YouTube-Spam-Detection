@@ -5,7 +5,6 @@ from dotenv import load_dotenv
 import googleapiclient.discovery
 import googleapiclient.errors
 from google.oauth2 import service_account
-import json
 import os
 import pandas as pd
 from sklearn.feature_extraction.text import TfidfVectorizer
