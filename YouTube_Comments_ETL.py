@@ -4,6 +4,8 @@
 from dotenv import load_dotenv
 import googleapiclient.discovery
 import googleapiclient.errors
+from google.oauth2 import service_account
+import json
 import os
 import pandas as pd
 from sklearn.feature_extraction.text import TfidfVectorizer
@@ -22,11 +24,16 @@ load_dotenv()
 api_service_name = "youtube"
 api_version = "v3"
 DEVELOPER_KEY = os.getenv("DEVELOPER_KEY")
+SERVICE_ACCOUNT_FILE = "charming-well-424900-n4-39304b00884f.json"
+SCOPES = ["https://www.googleapis.com/auth/youtube.force-ssl"]
+credentials = service_account.Credentials.from_service_account_file(
+    SERVICE_ACCOUNT_FILE, scopes=SCOPES
+)
 
 
 # inputting youtube credentials
 youtube = googleapiclient.discovery.build(
-    api_service_name, api_version, developerKey=DEVELOPER_KEY
+    api_service_name, api_version, developerKey=DEVELOPER_KEY, credentials=credentials
 )
 
 
