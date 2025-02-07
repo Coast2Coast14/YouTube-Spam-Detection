@@ -1,3 +1,4 @@
 .env
 youtube_comments.db
 charming-well-424900-n4-7cfbc2bd35b9.json
+.streamlit/secrets.toml
