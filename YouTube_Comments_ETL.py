@@ -18,10 +18,8 @@ st.set_page_config(
     page_icon="🔒",  # You can use an emoji or upload an image
 )
 
-st.title("Spam Detector for YouTube Creators")
-st.write(
-    "Are you having trouble figuring out which of your comments are spam? Use this tool to find out!"
-)
+st.title("YouTube Comments Spam Detector")
+st.write("Don't know which comments are spam? Find out here!")
 url = st.text_input("Enter YouTube Video URL")
 
 # Load environment variables from .env file
