@@ -13,7 +13,10 @@ from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 import streamlit as st
 
-st.title("YouTube Comment Spam Detector")
+st.title("Spam Detector for YouTube Creators")
+st.write(
+    "Are you having trouble figuring out which of your comments are spam? Use this tool to find out!"
+)
 url = st.text_input("Enter YouTube Video URL")
 
 # Load environment variables from .env file
