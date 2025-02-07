@@ -13,6 +13,11 @@ from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 import streamlit as st
 
+st.set_page_config(
+    page_title="YouTube Comments Spam Detector",
+    page_icon="🔒",  # You can use an emoji or upload an image
+)
+
 st.title("Spam Detector for YouTube Creators")
 st.write(
     "Are you having trouble figuring out which of your comments are spam? Use this tool to find out!"
