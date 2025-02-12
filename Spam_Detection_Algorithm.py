@@ -1,8 +1,9 @@
-import pandas as pd
-import re
+import joblib
 import nltk
 from nltk.sentiment.vader import SentimentIntensityAnalyzer
 from nltk.corpus import stopwords
+import pandas as pd
+import re
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.ensemble import RandomForestClassifier
 from sqlalchemy import create_engine
@@ -53,4 +54,15 @@ def train_random_forest_model():
     model = RandomForestClassifier(n_estimators=100, random_state=42)
     model.fit(X_train_tfidf, y_train)
 
+    # Save the trained model
+    joblib.dump(model, "random_forest_model.pkl")
+    print("Model saved as random_forest_model.pkl")
+
+    # Save the vectorizer
+    joblib.dump(vectorizer, "tfidf_vectorizer.pkl")
+    print("Vectorizer saved as tfidf_vectorizer.pkl")
+
     return model, vectorizer
+
+
+train_random_forest_model()

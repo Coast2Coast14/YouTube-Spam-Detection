@@ -5,6 +5,7 @@ from dotenv import load_dotenv
 import googleapiclient.discovery
 import googleapiclient.errors
 from google.oauth2 import service_account
+import joblib
 import os
 import pandas as pd
 from sklearn.feature_extraction.text import TfidfVectorizer
@@ -251,12 +252,8 @@ def run_data_pipeline():
 
     insert_table(db_connection=db_connection, df=df)
 
-    try:
-        model, vectorizer = train_random_forest_model()
-        print("Model Trained")
-
-    except:
-        print("Model Not Trained")
+    model = joblib.load("random_forest_model.pkl")
+    vectorizer = joblib.load("tfidf_vectorizer.pkl")
 
     # df_new_comments = classify_comments(model=model, vectorizer=vectorizer)
 
